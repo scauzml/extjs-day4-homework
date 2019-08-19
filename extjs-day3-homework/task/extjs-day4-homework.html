@@ -164,30 +164,50 @@
                 ]
             })
 
-            var tmpl = Ext.DomHelper.createTemplate({
-                tag: 'table',
-                cls: 'my-table',
-                children: [{
-                        tag: 'tr',
-                        html: '<td>I am {name}, {age} years old.</td>'
+            // var tmpl = Ext.DomHelper.createTemplate({
+            //     tag: 'table',
+            //     cls: 'my-table',
+            //     children: [{
+            //             tag: 'tr',
+            //             html: '<td>I am {name}, {age} years old.</td>'
+            //         }
+
+            //     ]
+            // });
+            var data={
+                datas:[
+                    {
+                        name:'lance',
+                        age:18,
+                    },
+                    {
+                        name:'lance',
+                        age:18,
+                    },
+                    {
+                        name:'lance',
+                        age:18,
                     }
-
                 ]
-            });
-
-            Ext.getCmp('insert').on('click',function(){
-                tmpl.append('template', {
-                name: 'lance',
-                age: 18
-            });
+            }
+            var tpl = new Ext.XTemplate(
+                '<table border="1">',
+                '<tpl for="datas">',
+                '<tr><td>I am {name}, {age} years old.</td></tr>',
+                '</tpl>',
+                '</table>'
+            );
+             
+            Ext.getCmp('insert').on('click', function () {
+                tpl.overwrite('template', data);
             })
 
-            Ext.get(document).on('contextmenu',function(e){
+            Ext.get(document).on('contextmenu', function (e) {
                 e.preventDefault();
                 menu.showAt(e.getXY());
             })
-           
-            Ext.get('form').on('contextmenu',function(e){
+
+            Ext.get('form').on('contextmenu', function (e) {
                 e.preventDefault();
                 menu.showAt(e.getXY());
             })
@@ -228,9 +248,9 @@
         });
     </script>
     <style>
-   #template .my-table{
-        border:1 
-    }
+        #template .my-table {
+            border: 1
+        }
     </style>
 </head>
 
