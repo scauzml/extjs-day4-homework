@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="../ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="../ext-3.3.0/ext-all.js"></script>
+    <link rel="stylesheet" type="text/css" href="../ext-3.3.0/resources/css/ext-all.css" />
+    <title>Title</title>
+    <script>
+        Ext.onReady(function () {
+            Ext.QuickTips.init(); // enable tooltips
+            Ext.override(Ext.form.HtmlEditor, {
+                initEditor: function () {
+                    var dbody = this.getEditorBody();
+                    var ss = this.el.getStyles('font-size', 'font-family', 'background-image',
+                        'background-repeat');
+                    ss['background-attachment'] = 'fixed';
+                    // w3c           
+                    ss['background-color'] = 'white';
+                    dbody.bgProperties = 'fixed'; // ie           
+                    Ext.DomHelper.applyStyles(dbody, ss);
+                    if (this.doc) {
+                        try {
+                            Ext.EventManager.removeAll(this.doc);
+                        } catch (e) {}
+                    }
+                    this.doc = this.getDoc();
+                    Ext.EventManager.on(this.doc, {
+                        // 'mousedown': this.onEditorEvent,
+                        // 'dblclick': this.onEditorEvent,
+                        // 'click': this.onEditorEvent,
+                        'keyup': this.onEditorKeyUpEvent,
+                        // 'keydown': this.onEditorKeyDownEvent,
+                        // 'keypress': this.onEditorKeyPressEvent,
+                        buffer: 100,
+                        scope: this
+                    });
+                    // if (Ext.isGecko) {
+                    //     Ext.EventManager.on(this.doc, 'keypress', this.applyCommand, this);
+                    // }
+                    // if (Ext.isIE || Ext.isSafari || Ext.isOpera) {
+                    //     Ext.EventManager.on(this.doc, 'keydown', this.fixKeys, this);
+                    // }
+                    this.initialized = true;
+                    this.fireEvent('initialize', this);
+                    this.doc.editorInitialized = true;
+                    this.pushValue();
+                },
+                initComponent: function () {
+                    this.addEvents(
+                        // 'initialize',
+                        // 'activate',
+                        // 'beforesync',
+                        // 'beforepush',
+                        // 'sync',
+                        // 'push',
+                        // 'editmodechange',
+                        // 'keydown',
+                        'keyup',
+                        // 'keypress'
+                    );
+                },
+                // onEditorKeyPressEvent: function (e) {
+                //     this.updateToolbar();
+                //     this.fireEvent("keypress", this, e);
+                // },
+                onEditorKeyUpEvent: function (e) {
+                    this.updateToolbar();
+                    this.fireEvent("keyup", this, e);
+                },
+                // onEditorKeyDownEvent: function (e) {
+                //     this.updateToolbar();
+                //     this.fireEvent("keydown", this, e);
+                // }
+            }); /**  * 重写后的Ext.form.HtmlEditor有了键盘的keyPress事件了  */
+            Ext.ns("Ext.hoo.editor");
+            Ext.hoo.editor.HTMLEditor = Ext.extend(Ext.form.HtmlEditor, {
+                constructor: function () {
+                    Ext.hoo.editor.HTMLEditor.superclass.constructor.call(this, {
+                        renderTo: Ext.getBody(),
+                        fieldLabel: 'reply',
+                        height: 200,
+                        id: 'result',
+                        listeners: {
+                            //"keydown": function (editor, e) { alert("keydown:" + editor.getValue()); },
+                            "keyup": function (editor, e) {
+                                if (editor.getValue() != '') {
+                                    Ext.getCmp('submit').enable();
+                                } else {
+                                    Ext.getCmp('submit').disable();
+                                }
+                                // alert("keyup:" + editor.getValue()); 
+                            },
+                            //"keypress": function (editor, e) { alert("keypress:" + editor.getValue()); }
+                        }
+                    });
+                }
+            })
+            Ext.reg("Ext.hoo.editor.HTMLEditor", Ext.hoo.editor.HTMLEditor);
+
+            var edit = new Ext.menu.Menu({
+                items: [{
+                    text: 'reset',
+                    id: 'reset',
+                }]
+            })
+
+            var menu = new Ext.menu.Menu({
+                items: [{
+                        text: 'edit',
+                        menu: edit,
+                    },
+                    {
+                        text: 'insert',
+                        id: 'insert',
+                    }
+                ]
+            })
+            var toolbar = new Ext.Toolbar({
+                autoWith: true,
+                items: [{
+                    text: 'operation',
+                    menu: menu
+                }]
+            });
+
+
+
+            var submitt = new Ext.Button({
+                text: 'reply',
+                id: 'submit',
+                disabled: true,
+            })
+
+
+            var blogPanel = new Ext.Panel({
+                renderTo: "blogPanel",
+                title: 'blog',
+                xtype: 'container',
+                width: 800,
+                height: 800,
+                html: '<div id="template"></div>',
+                items: [
+                    toolbar,
+                    {
+                        id: 'form',
+                        xtype: 'form',
+                        title: '回复',
+
+                        defaultType: 'Ext.hoo.editor.HTMLEditor',
+                        items: [{
+                            width: 500,
+                            height: 200,
+
+
+                        }],
+
+                        buttons: [
+                            submitt
+                        ]
+
+                    }
+                ]
+            })
+
+            var tmpl = Ext.DomHelper.createTemplate({
+                tag: 'table',
+                cls: 'my-table',
+                children: [{
+                        tag: 'tr',
+                        html: '<td>I am {name}, {age} years old.</td>'
+                    }
+
+                ]
+            });
+
+            Ext.getCmp('insert').on('click',function(){
+                tmpl.append('template', {
+                name: 'lance',
+                age: 18
+            });
+            })
+
+            Ext.get(document).on('contextmenu',function(e){
+                e.preventDefault();
+                menu.showAt(e.getXY());
+            })
+           
+            Ext.get('form').on('contextmenu',function(e){
+                e.preventDefault();
+                menu.showAt(e.getXY());
+            })
+
+            Ext.getCmp('submit').on('click', function () {
+
+                var p = new Ext.ProgressBar({
+                    with: 200
+                });
+                var window = new Ext.Window({
+                    autoHeight: true,
+                    width: 200,
+                    items: [p]
+                })
+                window.show();
+                p.wait({
+                    interval: 100, //bar will move fast!
+                    duration: 3000,
+                    increment: 15,
+                    text: 'Updating...',
+                    scope: this,
+                    fn: function () {
+                        window.close();
+                        Ext.getCmp('result').setValue('');
+                        Ext.getCmp('submit').disable();
+                        Ext.Msg.alert('tip', 'success');
+
+                    }
+                });
+
+            })
+            Ext.getCmp('reset').on('click', function () {
+                Ext.getCmp('result').setValue('');
+                Ext.getCmp('submit').disable();
+            })
+
+
+        });
+    </script>
+    <style>
+   #template .my-table{
+        border:1 
+    }
+    </style>
+</head>
+
+<body>
+    <div id="blogPanel" style="position: relative;left:400px;top:50px"></div>
+    <div id="process"></div>
+</body>
+
+</html>
